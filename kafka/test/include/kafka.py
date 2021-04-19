@@ -74,7 +74,7 @@ class CConsumer:
         self.partition = 0
         self.offset = 0
 
-        self.consumer = self.create()
+        #self.consumer = self.create()
         #self.topic_partition = TopicPartition( self.topic, self.partition )
 
     def create(self):
@@ -102,27 +102,26 @@ class CConsumer:
         self.consumer.close()
 
     def fetch(self):
+        count = 0
         for message in self.consumer:
             value = json.loads( message.value.decode( "utf-8") )
             #print( f'message = { message }' )
-            print( f'message = { value }' )
+            print( f'[{count}] message = { value }' )
 
             #self.consumer.commitSync()
+            count += 1
 
     def datetime_add_days(self, start_datetime, days):
         start_datetime_str = start_datetime.strftime( "%Y-%m-%d" )
-        new_datetime = datetime.datetime.strptime(start_datetime_str, "%Y-%m-%d") + datetime.timedelta( days = days )
+        end_datetime = datetime.datetime.strptime(start_datetime_str, "%Y-%m-%d") + datetime.timedelta( days = days )
         print( f'start_datetime = { start_datetime }, timestamp = { start_datetime.timestamp() }' )
-        print( f'new_datetime = { new_datetime }, timestamp = { new_datetime.timestamp() }' )
+        print( f'end_datetime = { end_datetime }, timestamp = { end_datetime.timestamp() }' )
 
-        return new_datetime
+        return end_datetime
 
     def fetch_datetime(self, topic, start_datetime, end_datetime = None, days = None):
         if end_datetime == None:
             end_datetime = self.datetime_add_days( start_datetime, days )
-
-        print( f'datetime = { start_datetime } ~ { end_datetime }' )
-        return
 
         consumer = KafkaConsumer(
             topic,
@@ -137,21 +136,23 @@ class CConsumer:
         if end_datetime == None:
             end_datetime = self.datetime_add_days( start_datetime, days )
 
-        _start = consumer.offsets_for_times( {tp: start_datetime.timesstamp() * 1000} ) # timestamp: ms
-        _end = consumer.offsets_for_times( {tp: end_datetime.timesstamp() * 1000} ) # timestamp: ms
+        _start = consumer.offsets_for_times( {tp: start_datetime.timestamp() * 1000} ) # timestamp: ms
+        _end = consumer.offsets_for_times( {tp: end_datetime.timestamp() * 1000} ) # timestamp: ms
 
         consumer.seek( tp, _start[tp].offset )
 
 
         print( f'datetime = { start_datetime } ~ { end_datetime }' )
 
+        count = 0
         for message in consumer:
-            if end_datetime != None and message.offsets >= _end[tp].offset:
+            if _end != None and _end[tp] != None and message.offsets >= _end[tp].offset:
                 break;
 
             value = json.loads( message.value.decode( "utf-8") )
             #print( f'message = { message }' )
-            print( f'message = { value }' )
+            print( f'[{count}] message = { value }' )
+            count += 1
 
         consumer.close()
 
@@ -168,10 +169,12 @@ class CConsumer:
             consumer_timeout_ms = 1000
         )
 
+        count = 0
         for message in consumer:
             value = json.loads( message.value.decode( "utf-8") )
             #print( f'message = { message }' )
-            print( f'message = { value }' )
+            print( f'[{ count }] message = { value }' )
+            count += 1
 
         consumer.close()
 
@@ -180,7 +183,7 @@ class CConsumer:
 class CProducer:
     def __init__(self, topic):
         self.topic = topic
-        self.producer = self.create()
+        #self.producer = self.create()
 
     def create(self):
         producer = KafkaProducer(

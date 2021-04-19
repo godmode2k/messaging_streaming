@@ -43,7 +43,7 @@ from include.kafka import *
 
 
 def main():
-    topic = "test1_topic"
+    topic = "test1_topic1"
     data = { "test1_topic": "test1_topic_data" }
     data2 = [ "test1", "test2", "test3" ]
 

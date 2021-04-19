@@ -59,16 +59,18 @@ def main():
     consumer.test_fetch( topic )
     print()
 
+
     #start_datetime = datetime.datetime( 2021, 1, 1, 0, 0, 0 )
     start_datetime = datetime.datetime.today().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
     days = 1
-    consumer.datetime_add_days( start_datetime, days )
+    end_datetime = consumer.datetime_add_days( start_datetime, days )
     print()
 
-    start_datetime = datetime.datetime( 2021, 4, 16, 0, 0, 0 )
-    end_datetime = datetime.datetime( 2021, 4, 17, 0, 0, 0 )
+    #start_datetime = datetime.datetime( 2021, 4, 16, 0, 0, 0 )
+    #end_datetime = datetime.datetime( 2021, 4, 17, 0, 0, 0 )
     days = 1
-    #consumer.fetch_datetime( topic, start_datetime, end_datetime, None )
+
+    consumer.fetch_datetime( topic, start_datetime, end_datetime, None )
     #consumer.fetch_datetime( topic, start_datetime, None, days )
     print()
 
