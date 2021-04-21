@@ -120,9 +120,6 @@ class CConsumer:
         return end_datetime
 
     def fetch_datetime(self, topic, start_datetime = None, end_datetime = None, days = None):
-        if end_datetime == None:
-            end_datetime = self.datetime_add_days( start_datetime, days )
-
         consumer = KafkaConsumer(
             topic,
             bootstrap_servers = [g_KAFKA_HOST],
