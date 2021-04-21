@@ -119,7 +119,7 @@ class CConsumer:
 
         return end_datetime
 
-    def fetch_datetime(self, topic, start_datetime, end_datetime = None, days = None):
+    def fetch_datetime(self, topic, start_datetime = None, end_datetime = None, days = None):
         if end_datetime == None:
             end_datetime = self.datetime_add_days( start_datetime, days )
 
@@ -130,32 +130,35 @@ class CConsumer:
             enable_auto_commit = True,
             consumer_timeout_ms = 1000
         )
+        consumer.poll( 0 )
 
         tp = TopicPartition( topic, 0 )
 
-        if end_datetime == None:
-            end_datetime = self.datetime_add_days( start_datetime, days )
+        if start_datetime != None:
+            if end_datetime == None:
+                end_datetime = self.datetime_add_days( start_datetime, days )
 
-        _start = consumer.offsets_for_times( {tp: start_datetime.timestamp() * 1000} ) # timestamp: ms
-        _end = consumer.offsets_for_times( {tp: end_datetime.timestamp() * 1000} ) # timestamp: ms
+            _start = consumer.offsets_for_times( {tp: start_datetime.timestamp() * 1000} ) # timestamp: ms
+            _end = consumer.offsets_for_times( {tp: end_datetime.timestamp() * 1000} ) # timestamp: ms
 
-        consumer.seek( tp, _start[tp].offset )
+            consumer.seek( tp, _start[tp].offset )
 
 
         print( f'datetime = { start_datetime } ~ { end_datetime }' )
 
         count = 0
         for message in consumer:
-            if _end != None and _end[tp] != None and message.offsets >= _end[tp].offset:
-                break;
+            if start_datetime != None:
+                if _end != None and _end[tp] != None and message.offsets >= _end[tp].offset:
+                    break;
 
             value = json.loads( message.value.decode( "utf-8") )
             #print( f'message = { message }' )
-            print( f'[{count}] message = { value }' )
+            print( f'[{count}] message ({message.timestamp}, {message.offset} = { value }' )
             count += 1
 
-        consumer.close()
-
+        if start_datetime != None:
+            consumer.close()
 
     def test_fetch(self, topic):
         print( "CConsumer::test_test()" )
@@ -173,7 +176,7 @@ class CConsumer:
         for message in consumer:
             value = json.loads( message.value.decode( "utf-8") )
             #print( f'message = { message }' )
-            print( f'[{ count }] message = { value }' )
+            print( f'[{count}] message ({message.timestamp}, {message.offset} = { value }' )
             count += 1
 
         consumer.close()

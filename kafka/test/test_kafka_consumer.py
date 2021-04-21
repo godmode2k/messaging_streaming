@@ -72,6 +72,7 @@ def main():
 
     consumer.fetch_datetime( topic, start_datetime, end_datetime, None )
     #consumer.fetch_datetime( topic, start_datetime, None, days )
+    #consumer.fetch_datetime( topic )
     print()
 
 
